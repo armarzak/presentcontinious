@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="English">
+<meta name="theme-color" content="#EEF3FA">
+<title>Simple или Continuous</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+
+/* Layout: one centered column, like a lesson app — stats bar, mode switcher, one exercise card at a time */
+:root{
+  --bg:#EEF3FA; --surface:#FFFFFF; --surface-2:#F5F8FD; --line:#D7E0EE;
+  --ink:#17233F; --muted:#5B6A88;
+  --simple:#0B8F8F; --simple-soft:#DDF4F3;
+  --perfect:#6A4BE8; --perfect-soft:#ECE7FF;
+  --sun:#FFC23A; --sun-ink:#4A3300;
+  --good:#18884F; --good-soft:#DFF5E8; --bad:#D63A3F; --bad-soft:#FDE6E6;
+  --display:"Unbounded", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Nunito", "Segoe UI", system-ui, sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1628; --surface:#18223A; --surface-2:#1F2B47; --line:#2D3B5C;
+  --ink:#E7EDF9; --muted:#9CABC8;
+  --simple:#3CCFC9; --simple-soft:#123B42; --perfect:#A592FF; --perfect-soft:#2A2557;
+  --sun:#FFC94D; --sun-ink:#2E2000;
+  --good:#4BD08A; --good-soft:#163A2A; --bad:#FF7479; --bad-soft:#44202A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1628; --surface:#18223A; --surface-2:#1F2B47; --line:#2D3B5C;
+  --ink:#E7EDF9; --muted:#9CABC8;
+  --simple:#3CCFC9; --simple-soft:#123B42; --perfect:#A592FF; --perfect-soft:#2A2557;
+  --sun:#FFC94D; --sun-ink:#2E2000;
+  --good:#4BD08A; --good-soft:#163A2A; --bad:#FF7479; --bad-soft:#44202A; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+.wrap{max-width:740px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{font-size:clamp(22px,5vw,30px);font-weight:700}
+.brand h1 .s{color:var(--simple)} .brand h1 .p{color:var(--perfect)}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.stats{display:flex;gap:8px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-variant-numeric:tabular-nums;display:flex;gap:6px;align-items:baseline}
+.chip small{font-weight:600;color:var(--muted);font-size:13px}
+.chip.hot{background:var(--sun);border-color:var(--sun);color:var(--sun-ink)}
+.chip.hot small{color:var(--sun-ink)}
+
+/* tabs */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px}
+.tabs button{border:0;background:none;border-radius:999px;padding:9px 6px;font-weight:800;font-size:14px;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+@media (max-width:480px){.tabs{grid-template-columns:repeat(2,1fr);border-radius:20px}.tabs button{border-radius:14px}}
+
+/* theory */
+.theory{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.theory{grid-template-columns:1fr}}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{align-self:flex-start;font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:8px}
+.tag.s{background:var(--simple-soft);color:var(--simple)} .tag.p{background:var(--perfect-soft);color:var(--perfect)}
+.tcard h3{font-size:17px}
+.tcard p{margin:0}
+.formula{background:var(--surface-2);border-radius:10px;padding:10px 12px;font-weight:700;display:grid;gap:4px;font-size:15px}
+.formula span{color:var(--muted);font-weight:600}
+.ex{margin:0;padding-left:18px;display:grid;gap:4px}
+.ex b.s{color:var(--simple)} .ex b.p{color:var(--perfect)}
+.markers{display:flex;flex-wrap:wrap;gap:6px}
+.markers span{border:1.5px solid currentColor;border-radius:999px;padding:2px 10px;font-size:14px;font-weight:700}
+.markers.s span{color:var(--simple)} .markers.p span{color:var(--perfect)}
+.wide{grid-column:1/-1}
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.rule{grid-template-columns:1fr}}
+.rule div{border-radius:12px;padding:12px 14px}
+.rule .s{background:var(--simple-soft)} .rule .p{background:var(--perfect-soft)}
+.rule strong{display:block;font-family:var(--display);font-size:14px;margin-bottom:4px}
+.rule .s strong{color:var(--simple)} .rule .p strong{color:var(--perfect)}
+.verbs{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:15px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td:last-child{color:var(--perfect);font-weight:800;white-space:normal}
+td:first-child{white-space:normal;min-width:170px}
+.go{align-self:flex-start;background:var(--sun);color:var(--sun-ink);border:0;border-radius:12px;padding:12px 20px;font-weight:800}
+
+/* exercise */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.prog{display:flex;align-items:center;gap:12px;font-weight:800;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.bar{flex:1;height:10px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sun);border-radius:99px;transition:width .3s}
+.task{color:var(--muted);font-weight:700;font-size:15px;margin:0}
+.sent{font-size:clamp(20px,4.6vw,26px);font-weight:800;line-height:1.35;margin:0}
+.sent .gap{display:inline-block;min-width:3.2em;border-bottom:3px solid var(--sun);text-align:center}
+.sent .verb{color:var(--muted);font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{background:var(--surface-2);border:2px solid var(--line);border-radius:14px;padding:14px;font-weight:800;font-size:18px;text-align:center}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.opt.s{border-color:var(--simple);color:var(--simple)} .opt.p{border-color:var(--perfect);color:var(--perfect)}
+.word{font-family:var(--display);font-size:clamp(26px,7vw,40px);text-align:center;padding:20px 0;margin:0}
+.inrow{display:flex;gap:10px;flex-wrap:wrap}
+.inrow input{flex:1 1 220px;min-width:0;font:inherit;font-size:19px;font-weight:700;color:var(--ink);background:var(--surface-2);border:2px solid var(--line);border-radius:14px;padding:12px 14px}
+.inrow input.right{border-color:var(--good)} .inrow input.wrong{border-color:var(--bad)}
+.btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;background:var(--ink);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--muted);border:2px solid var(--line)}
+.btn.sun{background:var(--sun);color:var(--sun-ink)}
+.fb{border-radius:14px;padding:14px 16px;display:grid;gap:4px}
+.fb.ok{background:var(--good-soft)} .fb.no{background:var(--bad-soft)}
+.fb strong{font-family:var(--display);font-size:15px}
+.fb.ok strong{color:var(--good)} .fb.no strong{color:var(--bad)}
+.fb p{margin:0}
+.hint{color:var(--muted);font-size:15px;margin:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+/* result */
+.result{text-align:center;align-items:center}
+.stars{display:flex;gap:8px;justify-content:center}
+.stars svg{width:52px;height:52px}
+.result h2{font-size:24px}
+.result p{margin:0;color:var(--muted)}
+.big{font-family:var(--display);font-size:44px;font-variant-numeric:tabular-nums}
+.mist{width:100%;text-align:left;display:grid;gap:8px}
+.mist div{background:var(--surface-2);border-radius:12px;padding:10px 12px;font-size:15px}
+.mist b{color:var(--good)}
+
+canvas#fx{position:fixed;inset:0;pointer-events:none;width:100%;height:100%}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1><span class="s">Simple</span> или <span class="p">Continuous</span></h1>
+      <p>Тренажёр по английскому: Present Simple и Present Continuous</p>
+    </div>
+    <div class="stats">
+      <div class="chip" id="xpChip"><span id="xp">0</span><small>очков</small></div>
+      <div class="chip" id="stChip"><span id="streak">0</span><small>подряд</small></div>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="theory">Теория</button>
+    <button role="tab" data-tab="choice">Выбери</button>
+    <button role="tab" data-tab="type">Скобки</button>
+    <button role="tab" data-tab="sort">Маркеры</button>
+  </nav>
+
+  <main id="view"></main>
+</div>
+<canvas id="fx" hidden></canvas>
+
+<script>
+const THEORY = `
+<section class="theory">
+  <article class="tcard">
+    <span class="tag s">PRESENT SIMPLE</span>
+    <h3>Что происходит обычно, регулярно, всегда</h3>
+    <p>Привычки, расписание, факты.</p>
+    <div class="formula">
+      I / you / we / they + V <span>I play, they read</span>
+      he / she / it + V<sub>s</sub> <span>she plays, he watches</span>
+      Не: don't / doesn't + V <span>he doesn't like</span>
+      Вопрос: Do / Does … + V? <span>Does she swim?</span>
+    </div>
+    <ul class="ex">
+      <li>I <b class="s">go</b> to school every day.</li>
+      <li>My cat <b class="s">sleeps</b> a lot.</li>
+      <li>Water <b class="s">boils</b> at 100 °C.</li>
+    </ul>
+    <div class="markers s"><span>every day</span><span>always</span><span>usually</span><span>often</span><span>sometimes</span><span>never</span><span>on Mondays</span><span>twice a week</span></div>
+  </article>
+
+  <article class="tcard">
+    <span class="tag p">PRESENT CONTINUOUS</span>
+    <h3>Что происходит прямо сейчас</h3>
+    <p>Действие в процессе в момент речи или в этот период.</p>
+    <div class="formula">
+      I + am + V-ing <span>I am reading</span>
+      he / she / it + is + V-ing <span>she is dancing</span>
+      you / we / they + are + V-ing <span>they are playing</span>
+      Не: am not / isn't / aren't + V-ing <span>he isn't sleeping</span>
+      Вопрос: Am / Is / Are … + V-ing? <span>Are you listening?</span>
+    </div>
+    <ul class="ex">
+      <li>Look! It <b class="p">is raining</b>.</li>
+      <li>Mum <b class="p">is cooking</b> dinner now.</li>
+      <li>We <b class="p">are watching</b> a cartoon at the moment.</li>
+    </ul>
+    <div class="markers p"><span>now</span><span>right now</span><span>at the moment</span><span>Look!</span><span>Listen!</span><span>today</span><span>these days</span><span>at present</span></div>
+  </article>
+
+  <article class="tcard wide">
+    <h3>Как не перепутать</h3>
+    <div class="rule">
+      <div class="s"><strong>Simple</strong>Можно спросить «как часто?» Это бывает снова и снова или всегда правда.</div>
+      <div class="p"><strong>Continuous</strong>Можно спросить «что происходит сейчас?» Действие идёт в эту минуту, его можно увидеть или услышать.</div>
+    </div>
+    <p class="hint">Сравни: <i>I <b>play</b> tennis on Sundays</i> (обычно по воскресеньям) и <i>I <b>am playing</b> tennis now</i> (прямо сейчас на корте).</p>
+    <p class="hint">Глаголы чувств и знаний обычно не ставят в Continuous: <b>like, love, want, know, understand, need</b>. Говорим <i>I want ice cream</i>, а не <i>I am wanting</i>.</p>
+  </article>
+
+  <article class="tcard wide">
+    <h3>Как добавить -ing</h3>
+    <div class="verbs"><table>
+      <thead><tr><th>Правило</th><th>Пример</th><th>V-ing</th></tr></thead>
+      <tbody>
+        <tr><td>Обычно просто + ing</td><td>play, read, eat</td><td>playing, reading, eating</td></tr>
+        <tr><td>Немая -e на конце пропадает</td><td>make, dance, write</td><td>making, dancing, writing</td></tr>
+        <tr><td>Короткий слог: согласная удваивается</td><td>run, swim, sit, stop</td><td>running, swimming, sitting, stopping</td></tr>
+        <tr><td>-ie меняется на -y</td><td>lie, die, tie</td><td>lying, dying, tying</td></tr>
+      </tbody></table></div>
+    <button class="go" data-goto="choice">Начать упражнения</button>
+  </article>
+</section>`;
+
+const CHOICE = [
+  {s:"She ___ to school every day.", o:["goes","is going"], a:0, e:"Every day — регулярное действие, значит Present Simple. She → окончание -s."},
+  {s:"Look! The baby ___.", o:["is sleeping","sleeps"], a:0, e:"Look! — смотри, это происходит прямо сейчас. Present Continuous."},
+  {s:"We ___ pizza on Fridays.", o:["eat","are eating"], a:0, e:"On Fridays — по пятницам, это привычка. Present Simple."},
+  {s:"Be quiet! Dad ___ on the phone.", o:["is talking","talks"], a:0, e:"Папа разговаривает в эту минуту, поэтому просим тишины. Present Continuous."},
+  {s:"I ___ my teeth twice a day.", o:["brush","am brushing"], a:0, e:"Twice a day — два раза в день, регулярно. Present Simple."},
+  {s:"My dad ___ coffee every morning.", o:["drinks","is drinking"], a:0, e:"Every morning — регулярно. Present Simple, he → -s."},
+  {s:"Listen! Somebody ___ the piano.", o:["is playing","plays"], a:0, e:"Listen! — слышим прямо сейчас. Present Continuous."},
+  {s:"Water ___ at 100 °C.", o:["boils","is boiling"], a:0, e:"Это научный факт, он всегда правда. Present Simple."},
+  {s:"The children ___ in the garden at the moment.", o:["are playing","play"], a:0, e:"At the moment — в данный момент. Present Continuous: are playing."},
+  {s:"___ you ___ me now?", o:["Are … listening","Do … listen"], a:0, e:"Now — сейчас. Вопрос в Present Continuous: Are you listening?"},
+  {s:"He ___ TV on weekends.", o:["doesn't watch","isn't watching"], a:0, e:"On weekends — обычно по выходным. Present Simple, отрицание doesn't."},
+  {s:"It's cold today. I ___ my warm jacket.", o:["am wearing","wear"], a:0, e:"Today — речь о сегодняшнем дне, куртка на мне сейчас. Present Continuous."},
+  {s:"How often ___ you ___ your grandma?", o:["do … visit","are … visiting"], a:0, e:"How often — «как часто?». Это вопрос о привычке, Present Simple."},
+  {s:"I ___ chocolate ice cream.", o:["like","am liking"], a:0, e:"Like — глагол чувств, его не ставят в Continuous. Present Simple."},
+  {s:"The cat ___ fish.", o:["likes","is liking"], a:0, e:"Это то, что всегда правда про кота, и like не бывает в Continuous. Present Simple."},
+  {s:"Shh! Mum ___ a book right now.", o:["is reading","reads"], a:0, e:"Right now — прямо сейчас. Present Continuous."}
+];
+
+const TYPE = [
+  {s:"My sister ___ the piano every evening.", v:"play", a:["plays"], h:"Present Simple: she + V-s", e:"Every evening — регулярно. She plays."},
+  {s:"Look! The dog ___ after the cat.", v:"run", a:["is running","'s running"], h:"Present Continuous: is + V-ing (run → running, n удваивается)", e:"Look! — прямо сейчас. The dog is running."},
+  {s:"They ___ football now.", v:"not / play", a:["aren't playing","are not playing"], h:"Present Continuous: aren't + V-ing", e:"Now — сейчас. They aren't playing."},
+  {s:"He usually ___ at seven.", v:"get up", a:["gets up"], h:"Present Simple: he + V-s", e:"Usually — обычно. He gets up."},
+  {s:"I ___ a letter to my friend at the moment.", v:"write", a:["am writing","'m writing"], h:"Present Continuous: am + V-ing (write → writing, e пропадает)", e:"At the moment — сейчас. I am writing."},
+  {s:"We ___ cold weather.", v:"not / like", a:["don't like","do not like"], h:"Present Simple: don't + V", e:"Like — глагол чувств, только Simple. We don't like."},
+  {s:"Listen! The birds ___.", v:"sing", a:["are singing","'re singing"], h:"Present Continuous: are + V-ing", e:"Listen! — слышим сейчас. The birds are singing."},
+  {s:"Our teacher ___ us homework every Monday.", v:"give", a:["gives"], h:"Present Simple: he/she + V-s", e:"Every Monday — регулярно. The teacher gives."},
+  {s:"Kate ___ in the pool right now.", v:"swim", a:["is swimming","'s swimming"], h:"Present Continuous: is + V-ing (swim → swimming, m удваивается)", e:"Right now — прямо сейчас. Kate is swimming."},
+  {s:"The shop ___ at 9 a.m.", v:"open", a:["opens"], h:"Present Simple: it + V-s", e:"Расписание — это Present Simple. The shop opens."}
+];
+
+const SORT = [
+  ["every day","s"],["now","p"],["usually","s"],["at the moment","p"],["Look!","p"],["often","s"],["right now","p"],
+  ["on Sundays","s"],["Listen!","p"],["always","s"],["these days","p"],["sometimes","s"],["at present","p"],["twice a week","s"]
+];
+
+const ROUND = {choice:10, type:8, sort:14};
+const LS = k => { try { return localStorage.getItem(k) } catch(e) { return null } };
+const SS = (k,v) => { try { localStorage.setItem(k,v) } catch(e) {} };
+
+let xp = +(LS("spc_xp")||0), streak = 0, tab = "theory", R = null;
+const $ = s => document.querySelector(s);
+const view = $("#view");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a }
+function esc(s){ return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])) }
+function norm(s){ return s.toLowerCase().replace(/[’‘`]/g,"'").replace(/\s+/g," ").replace(/[.!?,]+$/,"").trim() }
+
+function stats(){
+  $("#xp").textContent = xp; $("#streak").textContent = streak;
+  $("#stChip").classList.toggle("hot", streak >= 3);
+  SS("spc_xp", xp);
+}
+
+function setTab(t){
+  tab = t;
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+  if (t === "theory"){ view.innerHTML = THEORY; return }
+  const src = t === "choice" ? CHOICE : t === "type" ? TYPE : SORT;
+  let items = shuffle(src).slice(0, ROUND[t]);
+  if (t === "choice") items = items.map(q => { const order = shuffle([0,1]); return {...q, o:order.map(i=>q.o[i]), a:order.indexOf(q.a)} });
+  R = {t, items, i:0, ok:0, done:false, misses:[]};
+  render();
+}
+
+function mark(right, missText){
+  if (right){ R.ok++; streak++; xp += 10 + Math.min(streak,5)*2 } else { streak = 0; if (missText) R.misses.push(missText) }
+  R.done = true; stats();
+}
+
+function gapHTML(s, verb){
+  const parts = esc(s).split("___");
+  return parts[0] + '<span class="gap">&nbsp;</span>' + (verb ? ' <span class="verb">(' + esc(verb) + ')</span>' : '') + (parts[1]||"");
+}
+
+function head(task){
+  const n = R.items.length, i = R.i + 1;
+  return `<div class="prog"><span>${i} / ${n}</span><div class="bar"><i style="width:${(R.i)/n*100}%"></i></div><span>${R.ok} ✓</span></div><p class="task">${task}</p>`;
+}
+
+function fb(right, text){
+  return `<div class="fb ${right?"ok":"no"}" role="status"><strong>${right?"Верно!":"Не совсем"}</strong><p>${text}</p></div>`;
+}
+function nextBtn(){ return `<div class="actions"><button class="btn sun" id="next">${R.i+1 < R.items.length ? "Дальше" : "Результат"}</button></div>` }
+
+function render(){
+  if (R.i >= R.items.length) return result();
+  const q = R.items[R.i];
+  if (R.t === "choice"){
+    view.innerHTML = `<section class="card">${head("Выбери правильную форму глагола")}
+      <p class="sent">${gapHTML(q.s)}</p>
+      <div class="opts">${q.o.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
+      <div id="after"></div></section>`;
+    view.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      if (R.done) return;
+      const k = +b.dataset.k, right = k === q.a;
+      view.querySelectorAll(".opt").forEach((x,j)=>{ x.disabled = true; if (j===q.a) x.classList.add("right") });
+      if (!right) b.classList.add("wrong");
+      mark(right, q.s.replace("___", "<b>"+esc(q.o[q.a])+"</b>"));
+      $("#after").innerHTML = fb(right, q.e) + nextBtn(); bindNext();
+    });
+  }
+  if (R.t === "type"){
+    view.innerHTML = `<section class="card">${head("Раскрой скобки: поставь глагол в нужную форму")}
+      <p class="sent">${gapHTML(q.s, q.v)}</p>
+      <form class="inrow" id="f"><input id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Впиши ответ" aria-label="Ответ"><button class="btn" type="submit">Проверить</button></form>
+      <p class="hint" id="hintTxt"><button class="btn ghost" type="button" id="hintBtn">Подсказка</button></p>
+      <div id="after"></div></section>`;
+    const inp = $("#ans"); inp.focus({preventScroll:true});
+    $("#hintBtn").onclick = () => { $("#hintTxt").textContent = q.h };
+    $("#f").onsubmit = e => {
+      e.preventDefault(); if (R.done) return;
+      if (!inp.value.trim()) { inp.focus(); return }
+      const right = q.a.some(a => norm(a) === norm(inp.value));
+      inp.classList.add(right?"right":"wrong"); inp.readOnly = true;
+      mark(right, q.s.replace("___", "<b>"+esc(q.a[0])+"</b>"));
+      $("#after").innerHTML = fb(right, (right ? "" : "Правильно: <b>"+esc(q.a[0])+"</b>. ") + q.e) + nextBtn(); bindNext();
+    };
+  }
+  if (R.t === "sort"){
+    const [w, k] = q;
+    view.innerHTML = `<section class="card">${head("К какому времени относится это слово-маркер?")}
+      <p class="word">${esc(w)}</p>
+      <div class="opts"><button class="opt s" data-k="s">Present Simple</button><button class="opt p" data-k="p">Present Continuous</button></div>
+      <div id="after"></div></section>`;
+    view.querySelectorAll(".opt").forEach(b => b.onclick = () => {
+      if (R.done) return;
+      const right = b.dataset.k === k;
+      view.querySelectorAll(".opt").forEach(x => { x.disabled = true; x.classList.remove("s","p"); if (x.dataset.k===k) x.classList.add("right") });
+      if (!right) b.classList.add("wrong");
+      const name = k==="s" ? "Present Simple" : "Present Continuous";
+      mark(right, `<b>${esc(w)}</b> → ${name}`);
+      $("#after").innerHTML = fb(right, `«${esc(w)}» — маркер ${name}.`) + nextBtn(); bindNext();
+    });
+  }
+}
+
+function bindNext(){
+  const n = $("#next"); n.focus({preventScroll:true});
+  n.onclick = () => { R.i++; R.done = false; render() };
+}
+
+function star(on){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="${on?"var(--sun)":"var(--surface-2)"}" stroke="${on?"var(--sun)":"var(--line)"}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+}
+
+function result(){
+  const n = R.items.length, p = R.ok / n;
+  const s = p >= .9 ? 3 : p >= .7 ? 2 : p >= .4 ? 1 : 0;
+  const msg = ["Ничего страшного! Загляни в теорию и попробуй ещё раз.","Неплохо! Ещё немного практики.","Хорошо! Почти без ошибок.","Отлично! Ты разобралась!"][s];
+  view.innerHTML = `<section class="card result">
+    <div class="stars">${[0,1,2].map(i=>star(i<s)).join("")}</div>
+    <div class="big">${R.ok} / ${n}</div>
+    <h2>${msg}</h2>
+    ${R.misses.length ? `<div class="mist"><p class="hint">Повтори эти примеры:</p>${R.misses.map(m=>`<div>${m}</div>`).join("")}</div>` : ""}
+    <div class="actions" style="justify-content:center">
+      <button class="btn ghost" id="toT">Теория</button>
+      <button class="btn sun" id="again">Ещё раунд</button>
+    </div></section>`;
+  $("#again").onclick = () => setTab(R.t);
+  $("#toT").onclick = () => setTab("theory");
+  if (s === 3) confetti();
+}
+
+function confetti(){
+  if (reduce) return;
+  const c = $("#fx"), ctx = c.getContext("2d"); c.hidden = false;
+  const W = c.width = innerWidth, H = c.height = innerHeight;
+  const cs = getComputedStyle(document.documentElement);
+  const cols = ["--sun","--simple","--perfect","--good"].map(v=>cs.getPropertyValue(v).trim());
+  const P = Array.from({length:120}, () => ({x:W/2, y:H*.35, vx:(Math.random()-.5)*12, vy:-Math.random()*12-4, r:Math.random()*6+4, c:cols[Math.floor(Math.random()*4)], a:Math.random()*6}));
+  let t = 0;
+  (function f(){
+    ctx.clearRect(0,0,W,H);
+    P.forEach(p => { p.vy += .35; p.x += p.vx; p.y += p.vy; p.a += .2; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); ctx.restore() });
+    if (++t < 110) requestAnimationFrame(f); else { ctx.clearRect(0,0,W,H); c.hidden = true }
+  })();
+}
+
+document.querySelector(".tabs").onclick = e => { const b = e.target.closest("button"); if (b) setTab(b.dataset.tab) };
+view.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g) setTab(g.dataset.goto) });
+stats(); setTab("theory");
+</script>
+
+</body>
+</html>
